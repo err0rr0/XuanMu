@@ -33,6 +33,6 @@ COPY service ./service
 COPY utils ./utils
 COPY --from=web-builder /app/web/dist-app ./web/dist-app
 
-EXPOSE 8000
+EXPOSE 8082
 
 CMD ["python", "main.py"]

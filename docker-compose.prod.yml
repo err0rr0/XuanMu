@@ -6,7 +6,9 @@ services:
       dockerfile: Dockerfile
     container_name: z3r0-app
     restart: always
-    network_mode: host
+    ports:
+      - "8082:8082"
+   #network_mode: host
     depends_on:
       postgres:
         condition: service_healthy
@@ -23,7 +25,7 @@ services:
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: z3r0
     ports:
-      - 5432:5432
+      - 5400:5432
     volumes:
       - ./.postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -39,9 +41,9 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: me@yvling.cn
       PGADMIN_DEFAULT_PASSWORD: 123456
-      PGADMIN_LISTEN_PORT: 5433
+      PGADMIN_LISTEN_PORT: 5401
     ports:
-      - 5433:5433
+      - 5401:5401
     volumes:
       - ./.pgadmin-data:/var/lib/pgadmin
     depends_on:
