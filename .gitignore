@@ -1,32 +1,64 @@
-.codex
-.claude
-.cursor
-.trellis
-.codegraph
+# ============================================================
+# XuanMu RedTeam Agent - Git 忽略规则
+# ============================================================
 
-/.agents
-/AGENTS.md
+# ---- Python ----
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
 
-.venv
-__pycache__
-dist
-cache
-node_modules
+# ---- Node.js / 前端 ----
+node_modules/
+web/node_modules/
+web/dist/
+web/dist-app/
+web/dist-landing/
+dist/
+cache/
 
-*.log
+# ---- 运行时配置和产物（含敏感信息）----
+.xuanmu/config.json
 .xuanmu/app.log
 .xuanmu/app.log.*
-.xuanmu/tiktoken_cache
-.xuanmu/config.json
+.xuanmu/tiktoken_cache/
 .xuanmu/outputs/
 
-web/node_modules
-web/dist
-web/dist-app
-web/dist-landing
-
-.postgres-data
-.pgadmin-data
-
-# Docker 环境变量（含敏感信息）
+# ---- Docker 数据和环境变量 ----
 .env
+.postgres-data/
+.pgadmin-data/
+
+# ---- Sandbox 二进制大文件（合计约 2GB，不应入库）----
+sandbox/*.zip
+sandbox/*.tar.gz
+sandbox/*.tgz
+sandbox/*.deb
+
+# ---- 日志 ----
+*.log
+
+# ---- macOS ----
+.DS_Store
+Thumbs.db
+
+# ---- IDE / 编辑器 ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- AI 工具配置（各家各的）----
+.codex/
+.claude/
+.cursor/
+.trellis/
+.codegraph/
+.kiro/
+/.agents/
+/AGENTS.md
+
+# ---- 其他 ----
+openapi.json
