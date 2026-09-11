@@ -38,6 +38,7 @@ web/node_modules
 web/dist
 web/dist-app
 web/dist-landing
+# 注意：web/openapi.json 不能排除，前端构建 generate:api 需要它
 
 # Docker 自身
 .postgres-data

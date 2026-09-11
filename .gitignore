@@ -61,4 +61,5 @@ Thumbs.db
 /AGENTS.md
 
 # ---- 其他 ----
-openapi.json
+# 只忽略根目录的 openapi.json，web/openapi.json 需要保留（前端构建依赖）
+/openapi.json
