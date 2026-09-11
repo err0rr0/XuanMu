@@ -27,3 +27,6 @@ web/dist-landing
 
 .postgres-data
 .pgadmin-data
+
+# Docker 环境变量（含敏感信息）
+.env

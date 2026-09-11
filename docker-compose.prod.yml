@@ -1,51 +1,77 @@
+# ============================================================
+# XuanMu RedTeam Agent - Docker Compose 生产部署
+# 使用方式：
+#   1. 复制 .env.example 为 .env 并填写配置
+#   2. docker compose -f docker-compose.prod.yml up -d
+#   3. 访问 http://localhost:8000
+#
+# 可选启动 pgAdmin：
+#   docker compose -f docker-compose.prod.yml --profile admin up -d
+# ============================================================
+
 services:
+  # ---- 主应用 ----
   app:
-    image: z3r0:latest
+    image: xuanmu:latest
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: z3r0-app
-    restart: always
+    container_name: xuanmu-app
+    restart: unless-stopped
     ports:
-      - "8082:8082"
-   #network_mode: host
+      - "${XUANMU_PORT:-8000}:8000"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
+      # 配置文件目录（config.json 必须存在于此）
       - ./.xuanmu:/app/.xuanmu
+      # Docker socket（沙箱功能需要，非沙箱模式可删除此行）
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=${TZ:-Asia/Shanghai}
 
+  # ---- PostgreSQL 数据库 ----
   postgres:
     image: postgres:16-alpine
-    container_name: z3r0-postgres
-    restart: always
+    container_name: xuanmu-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: z3r0
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-z3r0}
+      TZ: ${TZ:-Asia/Shanghai}
     ports:
-      - 5400:5432
+      - "${POSTGRES_PORT:-5400}:5432"
     volumes:
-      - ./.postgres-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d z3r0"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-root} -d ${POSTGRES_DB:-z3r0}"]
       interval: 5s
       timeout: 5s
       retries: 20
-    
+
+  # ---- pgAdmin（可选，通过 --profile admin 启用）----
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: z3r0-pgadmin
-    restart: always
+    container_name: xuanmu-pgadmin
+    restart: unless-stopped
+    profiles:
+      - admin
     environment:
-      PGADMIN_DEFAULT_EMAIL: me@yvling.cn
-      PGADMIN_DEFAULT_PASSWORD: 123456
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@xuanmu.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-changeme}
       PGADMIN_LISTEN_PORT: 5401
     ports:
-      - 5401:5401
+      - "${PGADMIN_PORT:-5401}:5401"
     volumes:
-      - ./.pgadmin-data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       postgres:
         condition: service_healthy
+
+volumes:
+  pgdata:
+    name: xuanmu-pgdata
+  pgadmin_data:
+    name: xuanmu-pgadmin-data

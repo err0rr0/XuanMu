@@ -155,8 +155,8 @@ The Blackboard layer complements the existing evidence plane (Asset / Finding / 
 ### One-command setup
 
 ```bash
-git clone https://github.com/guaidao2/XuanMu-RedTeam-Agent.git
-cd XuanMu-RedTeam-Agent
+git clone https://github.com/err0rr0/XuanMu.git
+cd XuanMu
 bash setup.sh
 ```
 

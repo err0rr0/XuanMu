@@ -4,13 +4,18 @@
 !entrypoint.sh
 !supervisord.conf
 !proxy/
-!proxy/go.mod
-!proxy/main.go
+!proxy/**
 !.agents/
 !.agents/skills/
 !.agents/skills/**
 !.agents/SKILL_TEMPLATE.md
 !.agents/validate-skills.sh
+!ghidra.zip
+!jadx.zip
+!chrome-extensions.zip
+!agent-browser-cli.tgz
+!observer-ward.deb
+!httpx.zip
 
 **/.DS_Store
 **/Thumbs.db

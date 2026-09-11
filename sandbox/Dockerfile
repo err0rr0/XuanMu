@@ -22,22 +22,24 @@ FROM debian:trixie-slim AS agent-browser-builder
 ARG DEBIAN_FRONTEND=noninteractive
 ARG AGENT_BROWSER_VERSION
 
+COPY chrome-extensions.zip /tmp/chrome-extensions.zip
+COPY agent-browser-cli.tgz /tmp/agent-browser-cli.tgz
+
 RUN set -eux; \
+    sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources; \
     apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates curl tar unzip; \
+    apt-get install -y --no-install-recommends tar unzip; \
     mkdir -p \
       /opt/agent-browser/bin \
       /opt/agent-browser/chrome-extension \
       /tmp/agent-browser-cli \
       /tmp/agent-browser-extensions; \
-    curl -fsSL "https://github.com/sleepinginsummer/agent-browser-cli/releases/download/v${AGENT_BROWSER_VERSION}/chrome-extensions.zip" -o /tmp/chrome-extensions.zip; \
     unzip -q /tmp/chrome-extensions.zip -d /tmp/agent-browser-extensions; \
     extension_dir="$(find /tmp/agent-browser-extensions -type f -name manifest.json -printf '%h\n' | sort | head -n 1)"; \
     test -n "$extension_dir"; \
     echo "agent-browser extension dir: $extension_dir"; \
     cp -a "$extension_dir"/. /opt/agent-browser/chrome-extension; \
     test -f /opt/agent-browser/chrome-extension/manifest.json; \
-    curl -fsSL "https://github.com/sleepinginsummer/agent-browser-cli/releases/download/v${AGENT_BROWSER_VERSION}/sleepinsummer-agent-browser-cli-linux-x64-${AGENT_BROWSER_VERSION}.tgz" -o /tmp/agent-browser-cli.tgz; \
     tar -xzf /tmp/agent-browser-cli.tgz -C /tmp/agent-browser-cli; \
     cp /tmp/agent-browser-cli/package/bin/agent-browser-cli /opt/agent-browser/bin/agent-browser-cli; \
     chmod 755 /opt/agent-browser/bin/agent-browser-cli; \
@@ -55,12 +57,13 @@ FROM debian:trixie-slim AS ghidra-builder
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GHIDRA_VERSION
 ARG GHIDRA_BUILD
-ARG GHIDRA_URL=https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${GHIDRA_VERSION}_build/ghidra_${GHIDRA_VERSION}_PUBLIC_${GHIDRA_BUILD}.zip
+
+COPY ghidra.zip /tmp/ghidra.zip
 
 RUN set -eux; \
+    sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources; \
     apt-get update; \
-    apt-get install -y --no-install-recommends binutils ca-certificates curl unzip; \
-    curl -fsSL "$GHIDRA_URL" -o /tmp/ghidra.zip; \
+    apt-get install -y --no-install-recommends binutils unzip; \
     unzip -q /tmp/ghidra.zip -d /opt; \
     ghidra_dir="$(find /opt -maxdepth 1 -type d -name 'ghidra_*_PUBLIC' | sort | head -n 1)"; \
     test -n "$ghidra_dir"; \
@@ -84,13 +87,13 @@ FROM debian:trixie-slim AS jadx-builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG JADX_VERSION
-ARG JADX_URL=https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip
+
+COPY jadx.zip /tmp/jadx.zip
 
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates curl unzip; \
+    apt-get install -y --no-install-recommends unzip; \
     mkdir -p /opt/jadx; \
-    curl -fsSL "$JADX_URL" -o /tmp/jadx.zip; \
     unzip -q /tmp/jadx.zip -d /opt/jadx; \
     find /opt/jadx -type d \( \
       -name '.github' -o \
@@ -112,6 +115,7 @@ FROM debian:trixie-slim AS skills-validator
 WORKDIR /tmp
 
 RUN set -eux; \
+    sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources; \
     apt-get update; \
     apt-get install -y --no-install-recommends bash; \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/* /var/tmp/*
@@ -142,6 +146,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG OBSERVER_WARD_VERSION
 ARG HTTPX_VERSION
 
+COPY observer-ward.deb /tmp/predownloaded/observer-ward.deb
+COPY httpx.zip /tmp/predownloaded/httpx.zip
+
 RUN set -eux; \
     printf '%s\n' \
       'path-exclude=/usr/share/doc/*' \
@@ -151,8 +158,12 @@ RUN set -eux; \
       'path-exclude=/usr/share/locale/*' \
       'path-include=/usr/share/locale/locale.alias' \
       > /etc/dpkg/dpkg.cfg.d/01_nodoc; \
+    sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources; \
+    echo 'Acquire::Retries "10";' > /etc/apt/apt.conf.d/99retry; \
+    echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/99retry; \
+    echo 'Acquire::Queue-Mode "access";' >> /etc/apt/apt.conf.d/99retry; \
     apt-get update; \
-    apt-get install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends --fix-missing \
       7zip \
       apktool \
       ca-certificates \
@@ -188,16 +199,12 @@ RUN set -eux; \
       whois \
       x11vnc \
       xvfb; \
-    observer_ward_deb="/tmp/observer-ward.deb"; \
-    curl -fsSL "https://github.com/emo-crab/observer_ward/releases/download/v${OBSERVER_WARD_VERSION}/observer-ward_v${OBSERVER_WARD_VERSION}_x86_64-unknown-linux-musl.deb" -o "$observer_ward_deb"; \
-    apt-get install -y --no-install-recommends "$observer_ward_deb"; \
-    rm -f "$observer_ward_deb"; \
+    apt-get install -y --no-install-recommends /tmp/predownloaded/observer-ward.deb; \
+    rm -f /tmp/predownloaded/observer-ward.deb; \
     observer_ward -u; \
-    httpx_zip="/tmp/httpx.zip"; \
-    curl -fsSL "https://github.com/projectdiscovery/httpx/releases/download/v${HTTPX_VERSION}/httpx_${HTTPX_VERSION}_linux_amd64.zip" -o "$httpx_zip"; \
-    unzip -q "$httpx_zip" -d /tmp/httpx; \
+    unzip -q /tmp/predownloaded/httpx.zip -d /tmp/httpx; \
     install -m 755 /tmp/httpx/httpx /usr/local/bin/httpx; \
-    rm -rf "$httpx_zip" /tmp/httpx; \
+    rm -rf /tmp/predownloaded /tmp/httpx; \
     ln -sf vnc.html /usr/share/novnc/index.html; \
     mkdir -p /data; \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*

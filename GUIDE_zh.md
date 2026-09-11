@@ -7,6 +7,8 @@
 ## 目录
 
 1. [快速安装](#quick-install)
+   - [Docker 部署（推荐）](#docker-deploy)
+   - [本地安装（Linux）](#local-install)
 2. [配置 LLM](#configure-llm)
 3. [启动与登录](#start--login)
 4. [创建你的第一个项目](#create-project)
@@ -22,22 +24,135 @@
 <a id="quick-install"></a>
 ## 1. 快速安装 / Quick Install
 
-### 环境要求
+XuanMu 提供两种安装方式。**Docker 部署**是推荐方式，支持 macOS / Linux / Windows 三大平台，无需手动安装依赖；**本地安装**适用于需要在 Kali Linux 等环境直接运行的场景。
+
+---
+
+<a id="docker-deploy"></a>
+### 方式一：Docker 部署（推荐）
+
+Docker 方式将应用、数据库全部打包在容器中，一条命令完成部署。
+
+#### 环境要求
+
+| 项目 | 要求 |
+|------|------|
+| 操作系统 | macOS / Linux / Windows（任一） |
+| Docker | Docker Desktop（macOS/Windows）或 Docker Engine（Linux） |
+| 磁盘 | 至少 4GB 可用空间 |
+| 内存 | 建议 4GB+ |
+
+#### 安装 Docker
+
+如果你还没有安装 Docker：
+
+| 平台 | 安装方式 |
+|------|---------|
+| **macOS** | 下载 [Docker Desktop](https://www.docker.com/products/docker-desktop/)，或 `brew install --cask docker` |
+| **Windows** | 下载 [Docker Desktop](https://www.docker.com/products/docker-desktop/)，确保启用 WSL 2 后端 |
+| **Linux** | `curl -fsSL https://get.docker.com \| sh && sudo usermod -aG docker $USER`（注销重新登录） |
+
+安装后确认 Docker 已启动：
+
+```bash
+docker --version
+docker compose version
+```
+
+#### 一键部署
+
+```bash
+# 克隆仓库
+git clone https://github.com/err0rr0/XuanMu.git
+cd XuanMu
+
+# 运行 Docker 部署脚本
+bash docker-setup.sh
+```
+
+脚本会自动完成以下步骤：
+
+1. 检测操作系统和 Docker 环境
+2. 生成 `.env` 文件（数据库密码自动随机生成）
+3. 生成 `.xuanmu/config.json`（数据库连接自动适配 Docker 内部网络）
+4. 交互式引导配置 LLM API Key（也可跳过，稍后手动配置）
+5. 构建 Docker 镜像并启动所有服务
+
+首次构建大约需要 5-15 分钟（取决于网络速度），后续启动只需几秒。
+
+部署成功后你会看到：
+
+```
+  XuanMu 部署成功！
+
+  Web 界面:    http://localhost:8000
+  API 文档:    http://localhost:8000/docs
+  管理员登录:  admin@xuanmu.local / admin123
+```
+
+#### 常用运维命令
+
+```bash
+bash docker-setup.sh start     # 启动服务
+bash docker-setup.sh stop      # 停止服务
+bash docker-setup.sh restart   # 重启服务
+bash docker-setup.sh status    # 查看容器状态
+bash docker-setup.sh logs      # 查看实时日志（Ctrl+C 退出）
+bash docker-setup.sh clean     # 停止并清理所有数据（数据库会被删除！）
+```
+
+#### Windows 用户注意事项
+
+Windows 用户需要通过以下任一终端运行脚本：
+
+- **Git Bash**（推荐，安装 [Git for Windows](https://git-scm.com/download/win) 后自带）
+- **WSL 2 终端**（推荐，Windows 子系统 Linux）
+- **PowerShell**（需要 Git Bash 在系统 PATH 中）
+
+在 Git Bash 或 WSL 中操作和 macOS / Linux 完全一致：
+
+```bash
+git clone https://github.com/err0rr0/XuanMu.git
+cd XuanMu
+bash docker-setup.sh
+```
+
+#### Docker 部署文件说明
+
+| 文件 | 用途 |
+|------|------|
+| `docker-setup.sh` | 一键部署 + 运维管理脚本 |
+| `docker-compose.prod.yml` | Docker Compose 编排定义 |
+| `.env.example` | 环境变量模板（复制为 `.env` 使用） |
+| `.env` | 实际环境变量（含密码，不提交 Git） |
+| `Dockerfile` | 应用镜像构建定义 |
+| `.xuanmu/config.json` | 应用配置（含 LLM API Key） |
+
+> 💡 Docker 模式下，`.xuanmu/config.json` 中的数据库 `host` 应设为 `postgres`（Docker 服务名），而非 `127.0.0.1`。`docker-setup.sh` 会自动处理这一点。
+
+---
+
+<a id="local-install"></a>
+### 方式二：本地安装（Linux）
+
+适用于需要在宿主机直接运行的场景（如 Kali Linux 渗透测试环境）。
+
+#### 环境要求
 
 | 项目 | 要求 |
 |------|------|
 | 操作系统 | **Linux**（推荐 Kali Linux / Debian 12） |
-| Python | ≥ 3.12 |
-| Node.js | ≥ 18（前端构建需要） |
+| Python | >= 3.12 |
+| Node.js | >= 18（前端构建需要） |
 | PostgreSQL | 安装脚本会自动安装 |
 | 硬盘 | 至少 2GB 可用空间 |
 
-### 一键安装
+#### 一键安装
 
 ```bash
 # 克隆仓库
-git clone https://github.com/guaidao2/XuanMu-RedTeam-Agent.git
-cd XuanMu-RedTeam-Agent
+git clone https://github.com/err0rr0/XuanMu.git
+cd XuanMu
 
 # 运行安装脚本
 bash setup.sh
@@ -52,15 +167,15 @@ bash setup.sh
 5. 检查安装结果
 6. 创建便捷的 `start.sh` 和 `stop.sh` 脚本
 
-> ⚠️ 安装脚本需要 `sudo` 权限来安装系统包和配置 PostgreSQL。
+> 安装脚本需要 `sudo` 权限来安装系统包和配置 PostgreSQL。
 > 建议在**干净的虚拟机或专用机器**上运行。
 
 安装成功后你会看到：
 
 ```
-[✓] 安装完成
-[~] 创建便捷脚本...
-[✓] 便捷脚本已创建
+[OK] 安装完成
+[..] 创建便捷脚本...
+[OK] 便捷脚本已创建
 ```
 
 ---
@@ -70,7 +185,9 @@ bash setup.sh
 
 安装完成后，需要配置 LLM API 才能让智能体工作。
 
-### 方式一：交互式配置（推荐）
+> 如果你使用 Docker 部署并在 `docker-setup.sh` 中已完成了 API Key 配置，可以跳过此步。
+
+### 方式一：交互式配置（本地安装推荐）
 
 ```bash
 bash config-tool.sh
@@ -127,7 +244,22 @@ vi .xuanmu/config.json
 <a id="start--login"></a>
 ## 3. 启动与登录 / Start & Login
 
-### 启动
+### Docker 部署方式
+
+```bash
+# 启动
+bash docker-setup.sh start
+
+# 停止
+bash docker-setup.sh stop
+
+# 查看日志
+bash docker-setup.sh logs
+```
+
+### 本地安装方式
+
+#### 启动
 
 ```bash
 bash start.sh
@@ -140,25 +272,25 @@ Backend started on http://localhost:8000
 Frontend built
 ```
 
+#### 停止
+
+```bash
+bash stop.sh
+```
+
 ### 登录
 
 打开浏览器访问 **http://localhost:8000**
 
 默认管理员账号：
 
-| 字段 | 值 |
-|------|-----|
-| 邮箱 | `admin@admin.com` |
-| 密码 | `admin123` |
+| 字段 | Docker 部署 | 本地安装 |
+|------|------------|---------|
+| 邮箱 | `admin@xuanmu.local` | `admin@admin.com` |
+| 密码 | `admin123` | `admin123` |
 
 > ⚠️ **首次使用请立即修改默认密码！**
 > 点击左侧「系统管理」→「用户管理」修改密码。
-
-### 停止
-
-```bash
-bash stop.sh
-```
 
 ---
 
@@ -535,9 +667,53 @@ EOF
 
 ### Q: 如何升级到最新版本？
 
+**Docker 部署：**
+
+```bash
+git pull
+bash docker-setup.sh stop
+bash docker-setup.sh start    # 会自动重新构建镜像
+```
+
+**本地安装：**
+
 ```bash
 git pull
 source .venv/bin/activate
 pip install -r requirements.txt
 cd web && npm install && npm run build && cd ..
+```
+
+### Q: Docker 构建失败怎么办？
+
+1. 确认 Docker Desktop 已启动且正常运行
+2. 检查网络连接（构建需要下载依赖）
+3. 尝试清理 Docker 缓存后重建：`docker builder prune && bash docker-setup.sh start`
+4. 如果磁盘不足，清理无用镜像：`docker system prune`
+
+### Q: Docker 部署后如何修改 LLM 配置？
+
+直接编辑 `.xuanmu/config.json`，然后重启服务：
+
+```bash
+vi .xuanmu/config.json
+bash docker-setup.sh restart
+```
+
+也可以使用配置工具（本地需要 Python）：`bash config-tool.sh`
+
+### Q: Docker 部署和本地安装能共存吗？
+
+可以，但要注意端口冲突。Docker 默认使用 8000 端口，如果本地也在运行，需要修改 `.env` 中的 `XUANMU_PORT` 为其他值。数据库也各自独立——Docker 用容器内的 PostgreSQL，本地用宿主机的 PostgreSQL。
+
+### Q: 如何备份 Docker 部署的数据？
+
+数据库数据存储在 Docker 命名卷 `xuanmu-pgdata` 中。备份方式：
+
+```bash
+# 导出数据库
+docker exec xuanmu-postgres pg_dump -U root z3r0 > backup.sql
+
+# 恢复数据库
+cat backup.sql | docker exec -i xuanmu-postgres psql -U root z3r0
 ```

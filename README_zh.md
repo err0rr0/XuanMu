@@ -136,7 +136,8 @@
 | 结构化证据平面 | 资产、发现、关系图、攻击路径全部持久化 |
 | 共享推理黑板 | Cairn 风格 Fact-Intent 图，让推理过程可追溯 |
 | 可回放时间线 | 标准化事件流，可实时查看或后期回放 |
-| 无需 Docker | 命令通过 asyncio 子进程直接在宿主机运行 |
+| 无需 Docker | 本地模式下命令通过 asyncio 子进程直接在宿主机运行 |
+| Docker 一键部署 | 支持 macOS / Linux / Windows，一条命令完成全部部署 |
 | 知识库 | 结构化的安全方法论文档，智能体可查阅 |
 | 全功能 Web UI | 对话操作台 + 项目工作区，含图可视化 |
 | 国产 LLM 友好 | 直接 API 调用，支持 DeepSeek / Qwen / GLM 等 |
@@ -145,31 +146,78 @@
 
 ## 快速开始
 
-### 环境要求
+> 📖 **首次使用？请先阅读 [使用入门手册](GUIDE_zh.md)**，包含从安装到实战的完整指引。
 
-- **Linux**（推荐 Kali / Debian）
-- **Python ≥ 3.12**
-- **PostgreSQL**（安装脚本会自动安装）
-- **Node.js ≥ 18**（用于构建前端）
+### 方式一：Docker 部署（推荐）
 
-### 一键安装
+Docker 部署是最简单的方式，支持 **macOS / Linux / Windows** 三大平台。只需安装 Docker，无需手动配置 Python、Node.js 或 PostgreSQL。
+
+#### 环境要求
+
+| 项目 | 要求 |
+|------|------|
+| Docker | Docker Desktop（macOS/Windows）或 Docker Engine（Linux） |
+| 磁盘 | 至少 4GB 可用空间 |
+| 内存 | 建议 4GB+ |
+
+#### 一键部署
 
 ```bash
-git clone https://github.com/guaidao2/XuanMu-RedTeam-Agent.git
-cd XuanMu-RedTeam-Agent
+git clone https://github.com/err0rr0/XuanMu.git
+cd XuanMu
+bash docker-setup.sh
+```
+
+脚本会自动完成：
+1. 检测系统环境和 Docker 是否就绪
+2. 生成 `.env`（数据库密码自动随机生成）
+3. 生成 `.xuanmu/config.json`（数据库连接自动适配 Docker 网络）
+4. 交互式引导配置 LLM API Key
+5. 构建镜像并启动所有服务
+
+部署成功后访问 **http://localhost:8000**，默认管理员账号 `admin@xuanmu.local` / `admin123`。
+
+#### 常用命令
+
+```bash
+bash docker-setup.sh start     # 启动服务
+bash docker-setup.sh stop      # 停止服务
+bash docker-setup.sh restart   # 重启服务
+bash docker-setup.sh status    # 查看容器状态
+bash docker-setup.sh logs      # 查看实时日志
+bash docker-setup.sh clean     # 停止并清理所有数据（慎用）
+```
+
+#### Windows 用户说明
+
+Windows 用户需要先安装 [Docker Desktop](https://www.docker.com/products/docker-desktop/)，然后通过以下任一方式运行脚本：
+
+- **Git Bash**（安装 Git for Windows 后自带）：直接运行 `bash docker-setup.sh`
+- **WSL 2**（推荐）：在 WSL 终端中克隆仓库并运行
+- **PowerShell**：直接运行 `bash docker-setup.sh`（需要 Git Bash 在 PATH 中）
+
+---
+
+### 方式二：本地安装（Linux）
+
+适用于需要直接在宿主机运行的场景（如 Kali Linux 渗透测试环境）。
+
+#### 环境要求
+
+- **Linux**（推荐 Kali / Debian）
+- **Python >= 3.12**
+- **PostgreSQL**（安装脚本会自动安装）
+- **Node.js >= 18**（用于构建前端）
+
+#### 安装
+
+```bash
+git clone https://github.com/err0rr0/XuanMu.git
+cd XuanMu
 bash setup.sh
 ```
 
-> 📖 **首次使用？请先阅读 [使用入门手册](GUIDE_zh.md)**，包含从安装到实战的完整指引。
-
-脚本会自动完成：
-1. 安装系统依赖（PostgreSQL、Node.js）
-2. 配置数据库和用户
-3. 创建 Python 虚拟环境并安装依赖
-4. 构建前端界面
-5. 创建启动/停止脚本
-
-### 配置 LLM
+#### 配置 LLM
 
 ```bash
 vi .xuanmu/config.json
@@ -184,9 +232,7 @@ vi .xuanmu/config.json
 bash config-tool.sh
 ```
 
-它会一步步引导你设置每个智能体的 API Key、接口地址和模型，无需手动编辑 JSON。
-
-### 启动
+#### 启动
 
 ```bash
 bash start.sh

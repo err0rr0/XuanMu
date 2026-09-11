@@ -1,5 +1,8 @@
 # syntax=docker/dockerfile:1
 
+# ============================================================
+# 阶段 1：构建前端
+# ============================================================
 FROM node:22-alpine AS web-builder
 
 WORKDIR /app/web
@@ -10,7 +13,9 @@ RUN npm ci
 COPY web/ ./
 RUN npm run build
 
-
+# ============================================================
+# 阶段 2：后端运行时
+# ============================================================
 FROM python:3.13-slim AS backend
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -33,6 +38,11 @@ COPY service ./service
 COPY utils ./utils
 COPY --from=web-builder /app/web/dist-app ./web/dist-app
 
-EXPOSE 8082
+# 默认端口与 config.json.example 保持一致
+EXPOSE 8000
+
+# 健康检查：每 30 秒探测一次 /docs 端点
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/docs')" || exit 1
 
 CMD ["python", "main.py"]

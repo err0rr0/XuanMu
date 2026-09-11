@@ -1,18 +1,36 @@
+# ============================================================
+# Docker 构建上下文排除列表
+# .xuanmu 目录通过 volume 挂载，不需要打入镜像
+# ============================================================
+
+# 版本控制
 .git
+.gitignore
+
+# Python
 .venv
 *.pyc
 *.pyo
-*.log
 __pycache__
 
+# 日志
+*.log
+
+# IDE / 编辑器
 .codex
 .claude
 .cursor
 .trellis
 .codegraph
+.vscode
+.idea
 
+# 运行时配置（通过 volume 挂载）
 .xuanmu
+.env
+.env.*
 
+# 前端构建产物（Docker 内会重新构建）
 node_modules
 dist
 cache
@@ -20,3 +38,18 @@ web/node_modules
 web/dist
 web/dist-app
 web/dist-landing
+
+# Docker 自身
+.postgres-data
+.pgadmin-data
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# 沙箱（独立构建）
+sandbox
+
+# 文档和脚本（不需要打入镜像）
+*.md
+*.sh
+LICENSE
