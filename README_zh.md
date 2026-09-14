@@ -170,8 +170,8 @@ bash docker-setup.sh
 
 脚本会自动完成：
 1. 检测系统环境和 Docker 是否就绪
-2. 生成 `.env`（数据库密码自动随机生成）
-3. 生成 `.xuanmu/config.json`（数据库连接自动适配 Docker 网络）
+2. 生成 `.env`（端口和数据库配置）
+3. 生成 `.xuanmu/config.json`（自动适配 Docker 网络）
 4. 交互式引导配置 LLM API Key
 5. 构建镜像并启动所有服务
 
@@ -187,6 +187,22 @@ bash docker-setup.sh status    # 查看容器状态
 bash docker-setup.sh logs      # 查看实时日志
 bash docker-setup.sh clean     # 停止并清理所有数据（慎用）
 ```
+
+#### 自定义端口
+
+8000 端口被占了？只需改 `.env` 一个文件：
+
+```bash
+# 编辑 .env，把 XUANMU_PORT 改成你想要的端口
+vi .env
+# XUANMU_PORT=9000
+
+# 重启服务即可生效
+bash docker-setup.sh stop
+bash docker-setup.sh start
+```
+
+数据库密码同理，改 `.env` 中的 `POSTGRES_PASSWORD` 即可（首次部署前改；已部署的需要先 `clean` 再重建）。
 
 #### Windows 用户说明
 

@@ -1,4 +1,5 @@
 import json
+import os
 import secrets
 import tempfile
 from pathlib import Path
@@ -104,12 +105,16 @@ _LEGACY_CONTEXT_COMPRESSION_TRIGGER_RATIO = 0.95
 
 
 def load_config():
-    """load config from json file"""
+    """load config from json file, then apply environment variable overrides"""
     global _cfg
 
     next_cfg = read_config_file()
     for field_name in type(_cfg).model_fields:
         setattr(_cfg, field_name, getattr(next_cfg, field_name))
+
+    # 环境变量覆盖：Docker 部署时通过 .env → docker-compose → 容器环境变量透传
+    # 优先级：环境变量 > config.json
+    _apply_env_overrides(_cfg)
 
 
 def get_config():
@@ -157,3 +162,37 @@ def _migrate_config_data(data: dict[str, Any]) -> dict[str, Any]:
     if runtime.get("context_compression_trigger_ratio") == _LEGACY_CONTEXT_COMPRESSION_TRIGGER_RATIO:
         runtime["context_compression_trigger_ratio"] = default_runtime.context_compression_trigger_ratio
     return data
+
+
+def _apply_env_overrides(cfg: GlobalConfig) -> None:
+    """用环境变量覆盖配置项。
+    
+    Docker 部署场景下，用户只需修改 .env 文件，docker-compose 会将其透传为容器环境变量，
+    本函数在 config.json 加载后自动用环境变量覆盖对应字段。
+
+    支持的环境变量:
+        XUANMU_LISTEN_ADDR    - 监听地址（默认 0.0.0.0）
+        XUANMU_LISTEN_PORT    - 监听端口（默认 8000）
+        XUANMU_DB_HOST        - 数据库主机
+        XUANMU_DB_PORT        - 数据库端口
+        XUANMU_DB_NAME        - 数据库名
+        XUANMU_DB_USER        - 数据库用户名
+        XUANMU_DB_PASSWORD    - 数据库密码
+    """
+    # 系统监听配置
+    if v := os.environ.get("XUANMU_LISTEN_ADDR"):
+        cfg.system.listen_addr = v
+    if v := os.environ.get("XUANMU_LISTEN_PORT"):
+        cfg.system.listen_port = int(v)
+
+    # 数据库配置
+    if v := os.environ.get("XUANMU_DB_HOST"):
+        cfg.database.host = v
+    if v := os.environ.get("XUANMU_DB_PORT"):
+        cfg.database.port = int(v)
+    if v := os.environ.get("XUANMU_DB_NAME"):
+        cfg.database.database = v
+    if v := os.environ.get("XUANMU_DB_USER"):
+        cfg.database.username = v
+    if v := os.environ.get("XUANMU_DB_PASSWORD"):
+        cfg.database.password = v

@@ -3,7 +3,9 @@
 # 使用方式：
 #   1. 复制 .env.example 为 .env 并填写配置
 #   2. docker compose -f docker-compose.prod.yml up -d
-#   3. 访问 http://localhost:8000
+#   3. 访问 http://localhost:${XUANMU_PORT}
+#
+# 改端口/数据库密码？只需编辑 .env，无需改其他文件。
 #
 # 可选启动 pgAdmin：
 #   docker compose -f docker-compose.prod.yml --profile admin up -d
@@ -19,17 +21,23 @@ services:
     container_name: xuanmu-app
     restart: unless-stopped
     ports:
-      - "${XUANMU_PORT:-8000}:8000"
+      - "${XUANMU_PORT:-8000}:${XUANMU_PORT:-8000}"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
-      # 配置文件目录（config.json 必须存在于此）
       - ./.xuanmu:/app/.xuanmu
-      # Docker socket（沙箱功能需要，非沙箱模式可删除此行）
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - TZ=${TZ:-Asia/Shanghai}
+      # 环境变量透传 → config.py 自动覆盖 config.json 中对应字段
+      XUANMU_LISTEN_ADDR: "0.0.0.0"
+      XUANMU_LISTEN_PORT: "${XUANMU_PORT:-8000}"
+      XUANMU_DB_HOST: "postgres"
+      XUANMU_DB_PORT: "5432"
+      XUANMU_DB_NAME: "${POSTGRES_DB:-z3r0}"
+      XUANMU_DB_USER: "${POSTGRES_USER:-root}"
+      XUANMU_DB_PASSWORD: "${POSTGRES_PASSWORD:-xuanmu2025}"
+      TZ: ${TZ:-Asia/Shanghai}
 
   # ---- PostgreSQL 数据库 ----
   postgres:
@@ -38,7 +46,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-root}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-xuanmu2025}
       POSTGRES_DB: ${POSTGRES_DB:-z3r0}
       TZ: ${TZ:-Asia/Shanghai}
     ports:
@@ -60,7 +68,7 @@ services:
       - admin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@xuanmu.local}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-changeme}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-xuanmu2025}
       PGADMIN_LISTEN_PORT: 5401
     ports:
       - "${PGADMIN_PORT:-5401}:5401"

@@ -170,11 +170,12 @@ setup_config_json() {
 
     info "从模板生成 config.json ..."
 
-    # 读取 .env 中的数据库配置
-    local db_user db_pass db_name
+    # 从 .env 读取配置，保持 config.json 默认值与 .env 一致
+    local db_user db_pass db_name app_port
     db_user=$(read_env_var "POSTGRES_USER" "root")
-    db_pass=$(read_env_var "POSTGRES_PASSWORD" "changeme")
+    db_pass=$(read_env_var "POSTGRES_PASSWORD" "xuanmu2025")
     db_name=$(read_env_var "POSTGRES_DB" "z3r0")
+    app_port=$(read_env_var "XUANMU_PORT" "8000")
     local encrypt_key
     encrypt_key=$(generate_random_key)
 
@@ -185,16 +186,16 @@ import json, sys
 with open("$CONFIG_EXAMPLE", "r", encoding="utf-8") as f:
     cfg = json.load(f)
 
-# 系统配置
+# 系统配置（Docker 运行时环境变量会覆盖这些值，这里只是兜底默认）
 cfg["system"]["listen_addr"] = "0.0.0.0"
-cfg["system"]["listen_port"] = 8000
+cfg["system"]["listen_port"] = int("$app_port")
 cfg["system"]["encrypt_key"] = "$encrypt_key"
 cfg["system"]["bootstrap_admin"]["enabled"] = True
 cfg["system"]["bootstrap_admin"]["username"] = "admin"
 cfg["system"]["bootstrap_admin"]["email"] = "admin@xuanmu.local"
 cfg["system"]["bootstrap_admin"]["password"] = "admin123"
 
-# 数据库配置 —— Docker 容器间通过服务名互通
+# 数据库配置（Docker 运行时环境变量会覆盖这些值）
 cfg["database"]["host"] = "postgres"
 cfg["database"]["port"] = 5432
 cfg["database"]["database"] = "$db_name"
@@ -213,7 +214,7 @@ print("done")
 PYEOF
 
     log "config.json 已生成"
-    warn "数据库 host 已设为 'postgres'（Docker 内部服务名）"
+    info "Docker 运行时端口和数据库配置由 .env 环境变量自动覆盖"
 }
 
 # ============================================================

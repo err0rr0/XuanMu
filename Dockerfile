@@ -38,11 +38,12 @@ COPY service ./service
 COPY utils ./utils
 COPY --from=web-builder /app/web/dist-app ./web/dist-app
 
-# 默认端口与 config.json.example 保持一致
-EXPOSE 8000
+# 端口通过环境变量 XUANMU_LISTEN_PORT 控制，默认 8000
+ENV XUANMU_LISTEN_PORT=8000
+EXPOSE ${XUANMU_LISTEN_PORT}
 
-# 健康检查：每 30 秒探测一次 /docs 端点
+# 健康检查：从环境变量读取端口
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/docs')"]
+    CMD python -c "import os,urllib.request; urllib.request.urlopen(f'http://127.0.0.1:{os.environ.get(\"XUANMU_LISTEN_PORT\",8000)}/docs')"
 
 CMD ["python", "main.py"]

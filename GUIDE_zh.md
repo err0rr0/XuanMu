@@ -73,8 +73,8 @@ bash docker-setup.sh
 脚本会自动完成以下步骤：
 
 1. 检测操作系统和 Docker 环境
-2. 生成 `.env` 文件（数据库密码自动随机生成）
-3. 生成 `.xuanmu/config.json`（数据库连接自动适配 Docker 内部网络）
+2. 生成 `.env` 文件（端口和数据库配置）
+3. 生成 `.xuanmu/config.json`（自动适配 Docker 内部网络）
 4. 交互式引导配置 LLM API Key（也可跳过，稍后手动配置）
 5. 构建 Docker 镜像并启动所有服务
 
@@ -128,7 +128,36 @@ bash docker-setup.sh
 | `Dockerfile` | 应用镜像构建定义 |
 | `.xuanmu/config.json` | 应用配置（含 LLM API Key） |
 
-> 💡 Docker 模式下，`.xuanmu/config.json` 中的数据库 `host` 应设为 `postgres`（Docker 服务名），而非 `127.0.0.1`。`docker-setup.sh` 会自动处理这一点。
+> 💡 Docker 模式下，端口和数据库配置通过 `.env` 文件管理，环境变量会自动覆盖 `config.json` 中的对应字段。你不需要手动同步两边的配置。
+
+#### 自定义端口和数据库
+
+所有可配置项集中在 `.env` 一个文件中，改完重启即可生效：
+
+```bash
+vi .env
+```
+
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `XUANMU_PORT` | Web 访问端口 | `8000` |
+| `POSTGRES_PORT` | PostgreSQL 外部端口（调试用） | `5400` |
+| `POSTGRES_USER` | 数据库用户名 | `root` |
+| `POSTGRES_PASSWORD` | 数据库密码 | `xuanmu2025` |
+| `POSTGRES_DB` | 数据库名 | `z3r0` |
+
+**改端口示例：**
+
+```bash
+# 把 8000 改成 9000
+sed -i 's/XUANMU_PORT=8000/XUANMU_PORT=9000/' .env
+
+# 重启服务（不需要重新构建镜像）
+bash docker-setup.sh stop
+bash docker-setup.sh start
+```
+
+> 改数据库密码注意：如果已经启动过（数据卷已创建），需要先 `bash docker-setup.sh clean` 清除旧数据卷，再重新部署。PostgreSQL 只在首次初始化时读取密码。
 
 ---
 
