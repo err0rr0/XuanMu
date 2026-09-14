@@ -1,17 +1,17 @@
 {
     "system": {
         "listen_addr": "0.0.0.0",
-        "listen_port": 8000,
-        "encrypt_key": "replace-with-at-least-32-random-characters",
+        "listen_port": 8082,
+        "encrypt_key": "0KXwdDUu43OIlEQpV1joDrCDl5qic7/LflZQvfgh2Q8=",
         "bootstrap_admin": {
             "enabled": true,
             "username": "admin",
-            "email": "admin@z3r0.fans",
-            "password": "replace-with-a-strong-password"
+            "email": "admin@admin.com",
+            "password": "admin123"
         }
     },
     "database": {
-        "host": "127.0.0.1",
+        "host": "postgres",
         "port": 5432,
         "database": "z3r0",
         "username": "root",
@@ -45,9 +45,9 @@
             "code": "cso",
             "name": "玄幕",
             "description": "安全主管 · 任务分解与团队协调",
-            "base_url": "https://api.deepseek.com/v1",
+            "base_url": "https://pre-aibrain-large-model-engine.hellobike.cn/v1",
             "api_key": "",
-            "model": "deepseek-v4-flash",
+            "model": "DeepSeek-V4-Pro",
             "use_responses": false,
             "context_window": 1000000
         },
@@ -55,9 +55,9 @@
             "code": "cae",
             "name": "守拙",
             "description": "代码审计专家",
-            "base_url": "https://api.deepseek.com/v1",
+            "base_url": "https://pre-aibrain-large-model-engine.hellobike.cn/v1",
             "api_key": "",
-            "model": "deepseek-v4-flash",
+            "model": "DeepSeek-V4-Pro",
             "use_responses": false,
             "context_window": 1000000
         },
@@ -65,9 +65,9 @@
             "code": "cce",
             "name": "破阵",
             "description": "密码分析专家",
-            "base_url": "https://api.deepseek.com/v1",
+            "base_url": "https://pre-aibrain-large-model-engine.hellobike.cn/v1",
             "api_key": "",
-            "model": "deepseek-v4-flash",
+            "model": "DeepSeek-V4-Pro",
             "use_responses": false,
             "context_window": 1000000
         },
@@ -75,9 +75,9 @@
             "code": "cie",
             "name": "观星",
             "description": "情报侦察专家",
-            "base_url": "https://api.deepseek.com/v1",
+            "base_url": "https://pre-aibrain-large-model-engine.hellobike.cn/v1",
             "api_key": "",
-            "model": "deepseek-v4-flash",
+            "model": "DeepSeek-V4-Pro",
             "use_responses": false,
             "context_window": 1000000
         },
@@ -85,9 +85,9 @@
             "code": "cpe",
             "name": "破军",
             "description": "渗透测试专家",
-            "base_url": "https://api.deepseek.com/v1",
+            "base_url": "https://pre-aibrain-large-model-engine.hellobike.cn/v1",
             "api_key": "",
-            "model": "deepseek-v4-flash",
+            "model": "DeepSeek-V4-Pro",
             "use_responses": false,
             "context_window": 1000000
         },
@@ -95,9 +95,9 @@
             "code": "cre",
             "name": "溯源",
             "description": "逆向分析专家",
-            "base_url": "https://api.deepseek.com/v1",
+            "base_url": "https://pre-aibrain-large-model-engine.hellobike.cn/v1",
             "api_key": "",
-            "model": "deepseek-v4-flash",
+            "model": "DeepSeek-V4-Pro",
             "use_responses": false,
             "context_window": 1000000
         }

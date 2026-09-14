@@ -138,20 +138,7 @@ setup_env_file() {
 
     info "从模板生成 .env ..."
     cp .env.example "$ENV_FILE"
-
-    # 生成随机数据库密码
-    local db_pass
-    db_pass=$(generate_random_key | cut -c1-16)
-    # 跨平台 sed
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-        sed -i '' "s/POSTGRES_PASSWORD=changeme/POSTGRES_PASSWORD=${db_pass}/" "$ENV_FILE"
-        sed -i '' "s/PGADMIN_PASSWORD=changeme/PGADMIN_PASSWORD=${db_pass}/" "$ENV_FILE"
-    else
-        sed -i "s/POSTGRES_PASSWORD=changeme/POSTGRES_PASSWORD=${db_pass}/" "$ENV_FILE"
-        sed -i "s/PGADMIN_PASSWORD=changeme/PGADMIN_PASSWORD=${db_pass}/" "$ENV_FILE"
-    fi
-
-    log ".env 已生成（数据库密码已随机生成）"
+    log ".env 已生成"
 }
 
 # 从 .env 读取变量值
@@ -312,13 +299,34 @@ compose_up() {
     info "构建并启动 Docker 容器 ..."
     $COMPOSE_CMD -f "$COMPOSE_FILE" up -d --build
 
-    echo ""
-    echo -e "${GREEN}============================================${NC}"
-    echo -e "${GREEN}  XuanMu 部署成功！${NC}"
-    echo -e "${GREEN}============================================${NC}"
-    echo ""
+    # 等待几秒检查 app 容器是否正常运行
+    sleep 3
+    local app_status
+    app_status=$(docker inspect --format='{{.State.Status}}' xuanmu-app 2>/dev/null || echo "missing")
+
+    if [ "$app_status" = "running" ]; then
+        echo ""
+        echo -e "${GREEN}============================================${NC}"
+        echo -e "${GREEN}  XuanMu 部署成功！${NC}"
+        echo -e "${GREEN}============================================${NC}"
+    else
+        echo ""
+        echo -e "${YELLOW}============================================${NC}"
+        echo -e "${YELLOW}  容器已启动，但 app 可能未就绪${NC}"
+        echo -e "${YELLOW}============================================${NC}"
+        echo ""
+        echo "  如果看到数据库密码错误 (InvalidPasswordError)，说明"
+        echo "  数据卷中保存的旧密码与 .env 中的不一致。"
+        echo "  解决方法：清除旧数据卷后重新部署"
+        echo ""
+        echo "    bash docker-setup.sh clean"
+        echo "    bash docker-setup.sh"
+        echo ""
+    fi
+
     local port
     port=$(read_env_var "XUANMU_PORT" "8000")
+    echo ""
     echo "  Web 界面:    http://localhost:${port}"
     echo "  API 文档:    http://localhost:${port}/docs"
     echo "  管理员登录:  admin@xuanmu.local / admin123"
