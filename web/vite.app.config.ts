@@ -1,6 +1,29 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 
+// dev server SPA fallback：非静态资源请求全部返回 app/index.html
+function spaFallbackPlugin(): Plugin {
+  return {
+    name: "xuanmu-spa-fallback",
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        // 跳过 API 代理、静态资源、Vite 内部路径
+        if (
+          req.url &&
+          !req.url.startsWith("/api") &&
+          !req.url.startsWith("/@") &&
+          !req.url.startsWith("/node_modules") &&
+          !req.url.startsWith("/src") &&
+          !req.url.startsWith("/app")
+        ) {
+          req.url = "/app/index.html";
+        }
+        next();
+      });
+    },
+  };
+}
+
 // vendor groups split off into their own chunks so the main bundle stays small
 // and heavy libs (Semi-UI, xterm, markdown) can be cached independently
 const VENDOR_CHUNKS: Record<string, RegExp> = {
@@ -29,8 +52,8 @@ function semiEnglishOnlyPlugin(): Plugin {
 }
 
 export default defineConfig({
-  root: "app",
-  plugins: [react(), semiEnglishOnlyPlugin()],
+  // root 默认为 web/（即 vite.config 所在目录），不再用 app/ 子目录
+  plugins: [spaFallbackPlugin(), react(), semiEnglishOnlyPlugin()],
   server: {
     port: 5173,
     proxy: {
@@ -41,10 +64,11 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../dist-app",
+    outDir: "dist-app",
     emptyOutDir: true,
     chunkSizeWarningLimit: 800,
     rollupOptions: {
+      input: "app/index.html",
       output: {
         manualChunks(id: string) {
           if (!id.includes("node_modules")) return undefined;

@@ -84,8 +84,8 @@ export function AdminLayout() {
         <div className="brand-lockup">
           <img className="brand-logo" src={xuanmuLogo} alt="" />
           <div>
-            <div className="brand-name">XuanMu</div>
-            <div className="brand-kicker">红队智能体协作平台</div>
+            <div className="brand-name">XuanMu Pro</div>
+            <div className="brand-kicker">企业级智能安全扫描平台</div>
           </div>
         </div>
 
@@ -136,8 +136,8 @@ export function AdminLayout() {
           </nav>
         </div>
         <div className="admin-sidebar-footer">
-          <span className="brand-version">XuanMu v0.2.1</span>
-          <span className="brand-fork">Based on <a href="https://github.com/yv1ing/Z3r0" target="_blank" rel="noopener noreferrer">Z3r0</a></span>
+          <span className="brand-version">XuanMu Pro v0.2.1</span>
+          <span className="brand-fork">Based on <a href="https://github.com/err0rr0/XuanMu" target="_blank" rel="noopener noreferrer">XuanMu</a></span>
         </div>
       </aside>
 

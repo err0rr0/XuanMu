@@ -248,6 +248,13 @@ cleanup() {
 trap cleanup EXIT
 
 # 热重载模式启动后端
-# 通过环境变量告诉 main.py 启用 reload
+# 通过环境变量覆盖 config.json 中的数据库和端口配置（无需修改 config.json）
 export XUANMU_DEV_RELOAD=1
+export XUANMU_LISTEN_ADDR="127.0.0.1"
+export XUANMU_LISTEN_PORT="$APP_PORT"
+export XUANMU_DB_HOST="127.0.0.1"
+export XUANMU_DB_PORT="$(read_env_var POSTGRES_PORT 5400)"
+export XUANMU_DB_NAME="$(read_env_var POSTGRES_DB z3r0)"
+export XUANMU_DB_USER="$(read_env_var POSTGRES_USER root)"
+export XUANMU_DB_PASSWORD="$(read_env_var POSTGRES_PASSWORD xuanmu2025)"
 exec python main.py

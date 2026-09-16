@@ -44,8 +44,8 @@ export function LoginPage() {
         <div className="login-brand">
           <img className="brand-logo large" src={xuanmuLogo} alt="" />
           <div>
-            <span className="login-kicker">红队智能体协作平台</span>
-            <h1 id="login-title">XuanMu Console</h1>
+            <span className="login-kicker">企业级智能安全扫描平台</span>
+            <h1 id="login-title">XuanMu Pro</h1>
           </div>
         </div>
 
@@ -89,7 +89,7 @@ export function LoginPage() {
           </Button>
         </form>
         <div className="login-credit">
-          Based on <a href="https://github.com/yv1ing/Z3r0" target="_blank" rel="noopener noreferrer">Z3r0</a>
+          Based on <a href="https://github.com/err0rr0/XuanMu" target="_blank" rel="noopener noreferrer">XuanMu</a>
         </div>
       </section>
     </main>

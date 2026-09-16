@@ -24,8 +24,8 @@ import {
 } from "lucide-react";
 import { cx } from "../../shared/lib/className";
 
-const repositoryUrl = "https://github.com/yv1ing/Z3r0";
-const docsOverviewUrl = "https://github.com/yv1ing/Z3r0/blob/main/docs/en/guide/overview.md";
+const repositoryUrl = "https://github.com/err0rr0/XuanMu";
+const docsOverviewUrl = "https://github.com/err0rr0/XuanMu";
 const egressModes = ["Direct", "HTTP", "HTTPS", "SOCKS5"];
 
 type LandingPrimaryAction = {
@@ -149,9 +149,9 @@ export function LandingContent({ logoSrc, primaryAction }: LandingContentProps) 
       <section className="landing-hero" aria-label="XuanMu landing page">
         <div className="landing-hero-copy">
           <img className="landing-hero-logo" src={logoSrc} width="1000" height="1000" alt="XuanMu logo" />
-          <span className="page-eyebrow">开源红队智能体协作平台</span>
-          <h1>XuanMu RedTeam Agent</h1>
-          <p>面向授权渗透测试、漏洞挖掘、代码审计与安全研究的开源红队协作智能体平台。</p>
+          <span className="page-eyebrow">企业级智能安全扫描平台</span>
+          <h1>XuanMu Pro</h1>
+          <p>基于 XuanMu 二开的企业内部黑盒 Agent 扫描工具，多智能体协同驱动自动化安全评估。</p>
           <div className="landing-actions">
             <ActionLink action={primaryAction} primary />
             <ActionLink action={{ label: "GitHub", href: repositoryUrl, external: true }} icon={GitBranch} ghost />
@@ -205,7 +205,7 @@ export function LandingContent({ logoSrc, primaryAction }: LandingContentProps) 
 
       <Section className="landing-security" eyebrow="使用边界" title="仅限授权使用。">
         <div className="landing-panel landing-boundary">
-          <p>玄幕红队智能体（XuanMu RedTeam Agent）仅限在合法且获得明确授权的范围内用于安全测试、风险评估、代码审计和研究。不授予测试、扫描、访问或影响任何第三方系统、网络、服务、账户或数据的权限。</p>
+          <p>XuanMu Pro 仅限在合法且获得明确授权的范围内用于企业内部安全评估、黑盒扫描和漏洞验证。不授予测试、扫描、访问或影响任何第三方系统、网络、服务、账户或数据的权限。</p>
           <a className="landing-inline-link" href={docsOverviewUrl} target="_blank" rel="noopener noreferrer">
             Read the documentation
             <ArrowRight size={16} />
@@ -243,7 +243,7 @@ function Section({
 
 function ArchitecturePanel() {
   return (
-    <div className="landing-panel landing-architecture-panel" aria-label="Z3r0 architecture overview">
+    <div className="landing-panel landing-architecture-panel" aria-label="XuanMu Pro architecture overview">
       <div className="landing-panel-heading">
         <span className="page-eyebrow">System model</span>
         <h2>Workbench, API, runtime, evidence, sandbox, egress, and persistence are explicit layers.</h2>
