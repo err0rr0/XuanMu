@@ -6,6 +6,10 @@ import {
   loadLoginPage,
   loadPlaygroundPage,
   loadProtectedAdminShell,
+  loadEgressProxiesPage,
+  loadHostsPage,
+  loadSandboxContainersPage,
+  loadSandboxImagesPage,
   loadSystemConfigPage,
   loadSystemUsersPage,
   loadWorkProjectWorkspacePage,
@@ -24,9 +28,13 @@ const LoginPage = lazyRoute(loadLoginPage, "LoginPage");
 const ProtectedAdminShell = lazyRoute(loadProtectedAdminShell, "ProtectedAdminShell");
 const PlaygroundPage = lazyRoute(loadPlaygroundPage, "PlaygroundPage");
 const WorkProjectWorkspacePage = lazyRoute(loadWorkProjectWorkspacePage, "WorkProjectWorkspacePage");
+const WorkProjectsPage = lazyRoute(loadWorkProjectsPage, "WorkProjectsPage");
+const HostsPage = lazyRoute(loadHostsPage, "HostsPage");
+const EgressProxiesPage = lazyRoute(loadEgressProxiesPage, "EgressProxiesPage");
+const SandboxImagesPage = lazyRoute(loadSandboxImagesPage, "SandboxImagesPage");
+const SandboxContainersPage = lazyRoute(loadSandboxContainersPage, "SandboxContainersPage");
 const SystemUsersPage = lazyRoute(loadSystemUsersPage, "SystemUsersPage");
 const SystemConfigPage = lazyRoute(loadSystemConfigPage, "SystemConfigPage");
-const WorkProjectsPage = lazyRoute(loadWorkProjectsPage, "WorkProjectsPage");
 
 function ProtectedRoute() {
   const { isAuthenticated } = useAuth();
@@ -70,6 +78,10 @@ export function App() {
                 <Route element={<AdminOnlyRoute />}>
                   <Route path="/work-projects" element={<WorkProjectsPage />} />
                   <Route path="/work-projects/:projectId" element={<WorkProjectWorkspacePage />} />
+                  <Route path="/hosts" element={<HostsPage />} />
+                  <Route path="/egress-proxies" element={<EgressProxiesPage />} />
+                  <Route path="/sandbox-images" element={<SandboxImagesPage />} />
+                  <Route path="/sandbox-containers" element={<SandboxContainersPage />} />
                   <Route path="/system-users" element={<SystemUsersPage />} />
                   <Route path="/system-config" element={<SystemConfigPage />} />
                 </Route>
