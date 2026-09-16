@@ -1,34 +1,51 @@
+# ============================================================
+# XuanMu RedTeam Agent - 本地开发环境
+# 只跑基础设施（PostgreSQL），后端和前端在本机热跑
+#
+# 使用方式：
+#   bash dev.sh            # 一键启动（推荐）
+#   或手动：
+#   docker compose -f docker-compose.dev.yml up -d
+#   source .venv/bin/activate && python main.py
+# ============================================================
+
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: postgres
-    restart: always
+    container_name: xuanmu-dev-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: z3r0
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-xuanmu2025}
+      POSTGRES_DB: ${POSTGRES_DB:-z3r0}
+      TZ: ${TZ:-Asia/Shanghai}
     ports:
-      - 5400:5432
-    # volumes:
-    #   - ./.postgres-data:/var/lib/postgresql/data
+      - "${POSTGRES_PORT:-5400}:5432"
+    volumes:
+      - devpgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d z3r0"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-root} -d ${POSTGRES_DB:-z3r0}"]
       interval: 5s
       timeout: 5s
       retries: 20
-    
+
+  # pgAdmin 可选，需要时：docker compose -f docker-compose.dev.yml --profile admin up -d
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: pgadmin
-    restart: always
+    container_name: xuanmu-dev-pgadmin
+    restart: unless-stopped
+    profiles:
+      - admin
     environment:
-      PGADMIN_DEFAULT_EMAIL: me@yvling.cn
-      PGADMIN_DEFAULT_PASSWORD: 123456
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@xuanmu.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-xuanmu2025}
       PGADMIN_LISTEN_PORT: 5401
     ports:
-      - 5401:5401
-    # volumes:
-    #   - ./.pgadmin-data:/var/lib/pgadmin
+      - "${PGADMIN_PORT:-5401}:5401"
     depends_on:
       postgres:
         condition: service_healthy
+
+volumes:
+  devpgdata:
+    name: xuanmu-dev-pgdata

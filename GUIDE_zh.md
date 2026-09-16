@@ -17,7 +17,8 @@
 7. [使用黑板（Blackboard）](#blackboard)
 8. [使用自定义技能（Skills）](#custom-skills)
 9. [理解证据平面](#evidence-plane)
-10. [常见问题](#faq)
+10. [本地开发调试](#local-dev)
+11. [常见问题](#faq)
 
 ---
 
@@ -655,8 +656,95 @@ XuanMu 有两套独立的知识加载系统：
 
 ---
 
+<a id="local-dev"></a>
+## 10. 本地开发调试 / Local Development
+
+开发新功能时不需要每次重新构建 Docker 镜像。本地开发模式下，Docker 只负责跑 PostgreSQL，后端代码直接在本机运行，**改代码自动重启**。
+
+### 环境要求
+
+| 项目 | 要求 |
+|------|------|
+| Docker | 仅用于运行 PostgreSQL |
+| Python | >= 3.12 |
+| Node.js | >= 18（仅前端开发需要） |
+
+### 一键启动
+
+```bash
+bash dev.sh
+```
+
+脚本会自动完成：
+1. 生成 `.env` 和 `.xuanmu/config.json`（首次运行时，数据库配置自动指向本地 `127.0.0.1`）
+2. 启动 PostgreSQL 容器并等待就绪
+3. 创建 Python 虚拟环境并安装依赖（仅首次或依赖更新时）
+4. 以 **热重载模式** 启动后端（改代码自动重启，无需手动操作）
+
+### 前后端同时开发
+
+如果需要同时开发前端（Vite dev server + HMR）：
+
+```bash
+bash dev.sh --frontend
+```
+
+这会额外启动前端开发服务器（默认 `http://localhost:5173`），支持热模块替换。
+
+### 常用命令
+
+```bash
+bash dev.sh              # 启动后端（热重载）
+bash dev.sh --frontend   # 后端 + 前端同时开发
+bash dev.sh stop         # 停止开发数据库
+bash dev.sh db           # 只启动数据库（手动启动后端时用）
+bash dev.sh logs         # 查看数据库日志
+```
+
+### 开发模式 vs Docker 生产部署
+
+| | 开发模式 (`dev.sh`) | 生产部署 (`docker-setup.sh`) |
+|------|---------------------|-------------------------------|
+| PostgreSQL | Docker 容器 | Docker 容器 |
+| 后端 | 本机 Python（热重载） | Docker 容器（固定镜像） |
+| 前端 | 可选 Vite dev server | 构建产物打入镜像 |
+| 数据库连接 | `127.0.0.1:5400` | Docker 内部 `postgres:5432` |
+| 改代码 | 自动重启，秒级生效 | 需要重新 build 镜像 |
+| 适合场景 | 日常开发、调试、测试 | 服务器部署、演示 |
+
+### 手动启动（不用 dev.sh）
+
+如果你更习惯手动操作：
+
+```bash
+# 1. 启动数据库
+docker compose -f docker-compose.dev.yml up -d
+
+# 2. 激活虚拟环境
+source .venv/bin/activate
+
+# 3. 安装依赖（首次）
+pip install -r requirements.txt
+
+# 4. 启动后端（热重载）
+XUANMU_DEV_RELOAD=1 python main.py
+
+# 5. （可选）启动前端
+cd web && npm install && npm run dev
+```
+
+### 数据隔离
+
+开发环境和生产环境使用**独立的 Docker 数据卷**：
+- 开发：`xuanmu-dev-pgdata`
+- 生产：`xuanmu-pgdata`
+
+两者互不影响，可以同时存在。
+
+---
+
 <a id="faq"></a>
-## 10. 常见问题 / FAQ
+## 11. 常见问题 / FAQ
 
 ### Q: 智能体不按预期工作怎么办？
 

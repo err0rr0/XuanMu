@@ -20,7 +20,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from config import ROOT_PATH, get_config
+from config import ROOT_PATH, WORKSPACE, get_config
 
 from core.delegation.subagents import start_subagent_runtime, stop_subagent_runtime
 from core.runtime.session import get_agent_pool
@@ -122,6 +122,15 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app() -> FastAPI:
+    # reload 模式下 worker 进程不走 __main__，需要确保配置已加载
+    from config import CONFIG_FILE, load_config as _load_config, get_config as _get_config
+    if not _get_config().database.password:
+        # 配置尚未加载（还是默认空值），重新加载
+        if CONFIG_FILE.exists():
+            _load_config()
+            from logger import setup_logging as _setup_logging
+            _setup_logging(level="INFO", file_path=WORKSPACE / "app.log")
+
     app = FastAPI(
         title="XuanMu RedTeam Agent - 开源红队多智能体协作平台，用于授权安全评估、代码审计、渗透测试与安全研究。",
         version="0.2.1",
