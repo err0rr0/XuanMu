@@ -6,15 +6,15 @@ function spaFallbackPlugin(): Plugin {
   return {
     name: "xuanmu-spa-fallback",
     configureServer(server) {
-      server.middlewares.use((req, _res, next) => {
-        // 跳过 API 代理、静态资源、Vite 内部路径
+      server.middlewares.use((req: any, _res: any, next: () => void) => {
+        const url: string = req.url || "";
         if (
-          req.url &&
-          !req.url.startsWith("/api") &&
-          !req.url.startsWith("/@") &&
-          !req.url.startsWith("/node_modules") &&
-          !req.url.startsWith("/src") &&
-          !req.url.startsWith("/app")
+          url &&
+          !url.startsWith("/api") &&
+          !url.startsWith("/@") &&
+          !url.startsWith("/node_modules") &&
+          !url.startsWith("/src") &&
+          !url.startsWith("/app")
         ) {
           req.url = "/app/index.html";
         }

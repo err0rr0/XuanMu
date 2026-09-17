@@ -801,6 +801,35 @@ pip install -r requirements.txt
 cd web && npm install && npm run build && cd ..
 ```
 
+### Q: 如何构建和使用沙箱（Sandbox）？
+
+沙箱是一个独立的 Docker 容器，内置 nmap、sqlmap、ghidra 等安全工具，智能体可以在里面执行命令。
+
+**第一步：下载依赖并构建镜像**
+
+```bash
+cd sandbox
+bash download-deps.sh    # 自动从官方 Release 下载 ghidra、jadx、httpx 等（约 650MB）
+bash build.sh            # 构建 Docker 镜像（首次约 10-20 分钟）
+```
+
+也可以合并为一步（build.sh 会自动检测并下载缺失的依赖）：
+
+```bash
+cd sandbox && bash build.sh
+```
+
+**第二步：在前端配置**
+
+1. 进入 **Hosts** 页面，添加一个主机（Docker 运行的机器 IP + Docker 端口，通常是 `127.0.0.1:2375` 或远程主机）
+2. 进入 **Sandbox Images** 页面，添加镜像记录：
+   - Image Name: `sandbox-runtime:latest`
+   - Control Port: `8000`
+3. 进入 **Sandbox Containers** 页面，创建容器（选择主机和镜像）
+4. 启动容器后，可以在 Playground 的 `Select sandbox` 下拉框中选择该容器
+
+> 沙箱依赖文件（约 650MB）不包含在 Git 仓库中，首次使用需要下载。
+
 ### Q: Docker 构建失败怎么办？
 
 1. 确认 Docker Desktop 已启动且正常运行
