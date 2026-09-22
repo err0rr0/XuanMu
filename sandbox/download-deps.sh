@@ -19,7 +19,7 @@ GHIDRA_VERSION="12.1"
 GHIDRA_BUILD="20260513"
 JADX_VERSION="1.5.5"
 HTTPX_VERSION="1.9.0"
-OBSERVER_WARD_VERSION="2026.4.8"
+OBSERVER_WARD_VERSION="2026.6.28"
 AGENT_BROWSER_VERSION="0.3.4"
 
 # ---------- GitHub 镜像加速前缀（国内服务器访问 GitHub 慢时使用）----------
@@ -102,7 +102,7 @@ download \
 
 # ---------- 4. observer-ward ----------
 download \
-    "$(gh_url "https://github.com/emo-crab/observer_ward/releases/download/v${OBSERVER_WARD_VERSION}/observer_ward_amd64.deb")" \
+    "$(gh_url "https://github.com/emo-crab/observer_ward/releases/download/v${OBSERVER_WARD_VERSION}/observer-ward_v${OBSERVER_WARD_VERSION}_x86_64-unknown-linux-musl.deb")" \
     "observer-ward.deb" \
     "observer-ward ${OBSERVER_WARD_VERSION}"
 
