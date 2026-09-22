@@ -82,9 +82,13 @@ async def _bootstrap_admin_user() -> None:
 
 def _mount_frontend(app: FastAPI) -> None:
     """serve built frontend assets when web/dist-app exists"""
-    index_path = WEB_DIST_PATH / "index.html"
+    # vite 入口为 app/index.html，构建产物在 dist-app/app/index.html
+    # 同时兼容 index.html 直接在 dist-app 根目录的情况
+    index_path = WEB_DIST_PATH / "app" / "index.html"
     if not index_path.is_file():
-        logger.debug("frontend static route skipped: %s not found", index_path)
+        index_path = WEB_DIST_PATH / "index.html"
+    if not index_path.is_file():
+        logger.debug("frontend static route skipped: index.html not found in %s", WEB_DIST_PATH)
         return
 
     assets_path = WEB_DIST_PATH / "assets"
