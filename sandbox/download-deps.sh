@@ -20,7 +20,7 @@ GHIDRA_BUILD="20260513"
 JADX_VERSION="1.5.5"
 HTTPX_VERSION="1.9.0"
 OBSERVER_WARD_VERSION="2026.6.28"
-AGENT_BROWSER_VERSION="0.3.4"
+AGENT_BROWSER_VERSION="0.3.7"
 
 # ---------- GitHub 镜像加速前缀（国内服务器访问 GitHub 慢时使用）----------
 # 设为空则直接访问 GitHub
@@ -106,37 +106,17 @@ download \
     "observer-ward.deb" \
     "observer-ward ${OBSERVER_WARD_VERSION}"
 
-# ---------- 5. agent-browser-cli (npm tgz) ----------
+# ---------- 5. agent-browser-cli ----------
 download \
-    "https://registry.npmjs.org/@anthropic-ai/agent-browser-cli-linux-x64/-/agent-browser-cli-linux-x64-${AGENT_BROWSER_VERSION}.tgz" \
+    "$(gh_url "https://github.com/sleepinginsummer/agent-browser-cli/releases/download/v${AGENT_BROWSER_VERSION}/sleepinsummer-agent-browser-cli-linux-x64-${AGENT_BROWSER_VERSION}.tgz")" \
     "agent-browser-cli.tgz" \
     "agent-browser-cli ${AGENT_BROWSER_VERSION}"
 
 # ---------- 6. chrome-extensions ----------
-# agent-browser 的 Chrome 扩展，从 vercel-labs/agent-browser 仓库的 npm 主包中提取
-if [ "$SKIP_EXISTING" = true ] && [ -f "chrome-extensions.zip" ]; then
-    log "chrome-extensions.zip 已存在，跳过"
-else
-    info "下载 agent-browser Chrome 扩展 ..."
-    TMPDIR_EXT=$(mktemp -d)
-    if curl -fSL --retry 3 -o "$TMPDIR_EXT/agent-browser.tgz" \
-        "https://registry.npmjs.org/@anthropic-ai/agent-browser-cli/-/agent-browser-cli-${AGENT_BROWSER_VERSION}.tgz" 2>/dev/null; then
-        # 从 npm 包中提取 chrome-extension 目录并打包成 zip
-        tar xzf "$TMPDIR_EXT/agent-browser.tgz" -C "$TMPDIR_EXT" 2>/dev/null
-        EXT_DIR=$(find "$TMPDIR_EXT/package" -type f -name "manifest.json" -path "*/chrome-extension/*" -exec dirname {} \; 2>/dev/null | head -1)
-        if [ -n "$EXT_DIR" ] && [ -f "$EXT_DIR/manifest.json" ]; then
-            (cd "$EXT_DIR" && zip -qr - .) > chrome-extensions.zip
-            log "chrome-extensions.zip 已从 npm 包提取"
-        else
-            warn "无法从 npm 包中提取 Chrome 扩展"
-            warn "请手动准备 chrome-extensions.zip（包含 manifest.json 等扩展文件）"
-        fi
-    else
-        warn "Chrome 扩展下载失败，尝试备用方式 ..."
-        warn "请手动准备 chrome-extensions.zip"
-    fi
-    rm -rf "$TMPDIR_EXT"
-fi
+download \
+    "$(gh_url "https://github.com/sleepinginsummer/agent-browser-cli/releases/download/v${AGENT_BROWSER_VERSION}/chrome-extensions.zip")" \
+    "chrome-extensions.zip" \
+    "agent-browser chrome-extensions"
 
 # ---------- 检查结果 ----------
 echo ""
