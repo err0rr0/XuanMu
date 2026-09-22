@@ -24,7 +24,7 @@ done
 
 if [ "$missing" = true ]; then
     echo "检测到依赖文件缺失，开始下载 ..."
-    bash download-deps.sh --skip-existing
+    bash download-deps.sh --skip-existing "$@"
 
     # 再次检查
     for f in $REQUIRED_FILES; do

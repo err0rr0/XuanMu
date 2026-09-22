@@ -5,9 +5,10 @@
 #
 # 使用方式：
 #   cd sandbox
-#   bash download-deps.sh        # 下载所有依赖
-#   bash download-deps.sh --skip-existing   # 跳过已存在的文件
-#   docker build -t sandbox-runtime:latest .   # 构建镜像
+#   bash download-deps.sh                    # 下载所有依赖
+#   bash download-deps.sh --skip-existing    # 跳过已存在的文件
+#   bash download-deps.sh --mirror           # 使用 GitHub 镜像加速（国内服务器推荐）
+#   bash download-deps.sh --mirror --skip-existing  # 组合使用
 # ============================================================
 set -e
 
@@ -20,6 +21,10 @@ JADX_VERSION="1.5.5"
 HTTPX_VERSION="1.9.0"
 OBSERVER_WARD_VERSION="2026.4.8"
 AGENT_BROWSER_VERSION="0.3.4"
+
+# ---------- GitHub 镜像加速前缀（国内服务器访问 GitHub 慢时使用）----------
+# 设为空则直接访问 GitHub
+GITHUB_MIRROR=""
 
 # ---------- 颜色 ----------
 GREEN='\033[0;32m'
@@ -34,7 +39,17 @@ info() { echo -e "${BLUE}[..]${NC} $1"; }
 err()  { echo -e "${RED}[ERR]${NC} $1"; exit 1; }
 
 SKIP_EXISTING=false
-[ "${1:-}" = "--skip-existing" ] && SKIP_EXISTING=true
+for arg in "$@"; do
+    case "$arg" in
+        --skip-existing) SKIP_EXISTING=true ;;
+        --mirror) GITHUB_MIRROR="https://ghgo.xyz/" ;;
+    esac
+done
+
+# 给 GitHub URL 加镜像前缀的辅助函数
+gh_url() {
+    echo "${GITHUB_MIRROR}$1"
+}
 
 # 下载函数：如果文件已存在且 --skip-existing 则跳过
 download() {
@@ -61,30 +76,33 @@ download() {
 echo ""
 echo "========================================"
 echo "  XuanMu Sandbox 依赖下载"
+if [ -n "$GITHUB_MIRROR" ]; then
+echo "  镜像加速: $GITHUB_MIRROR"
+fi
 echo "========================================"
 echo ""
 
 # ---------- 1. Ghidra ----------
 download \
-    "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${GHIDRA_VERSION}_build/ghidra_${GHIDRA_VERSION}_PUBLIC_${GHIDRA_BUILD}.zip" \
+    "$(gh_url "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${GHIDRA_VERSION}_build/ghidra_${GHIDRA_VERSION}_PUBLIC_${GHIDRA_BUILD}.zip")" \
     "ghidra.zip" \
     "Ghidra ${GHIDRA_VERSION}"
 
 # ---------- 2. JADX ----------
 download \
-    "https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip" \
+    "$(gh_url "https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip")" \
     "jadx.zip" \
     "JADX ${JADX_VERSION}"
 
 # ---------- 3. httpx (ProjectDiscovery) ----------
 download \
-    "https://github.com/projectdiscovery/httpx/releases/download/v${HTTPX_VERSION}/httpx_${HTTPX_VERSION}_linux_amd64.zip" \
+    "$(gh_url "https://github.com/projectdiscovery/httpx/releases/download/v${HTTPX_VERSION}/httpx_${HTTPX_VERSION}_linux_amd64.zip")" \
     "httpx.zip" \
     "httpx ${HTTPX_VERSION}"
 
 # ---------- 4. observer-ward ----------
 download \
-    "https://github.com/emo-crab/observer_ward/releases/download/v${OBSERVER_WARD_VERSION}/observer_ward_amd64.deb" \
+    "$(gh_url "https://github.com/emo-crab/observer_ward/releases/download/v${OBSERVER_WARD_VERSION}/observer_ward_amd64.deb")" \
     "observer-ward.deb" \
     "observer-ward ${OBSERVER_WARD_VERSION}"
 

@@ -7,6 +7,9 @@ FROM node:22-alpine AS web-builder
 
 WORKDIR /app/web
 
+# npm 使用淘宝镜像加速
+RUN npm config set registry https://registry.npmmirror.com
+
 COPY web/package*.json ./
 RUN npm ci
 
@@ -23,9 +26,12 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
+# pip 使用阿里云镜像加速
 COPY requirements.txt ./
 RUN python -m pip install --no-cache-dir --upgrade pip \
-    && python -m pip install --no-cache-dir -r requirements.txt
+        -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com \
+    && python -m pip install --no-cache-dir -r requirements.txt \
+        -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 
 COPY app.py config.py database.py logger.py main.py ./
 COPY core ./core
